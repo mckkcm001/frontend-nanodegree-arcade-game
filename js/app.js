@@ -1,5 +1,4 @@
 // set parameters for game
-
 var cellWidth = 101;
 var cellHeight = 83;
 var numCols = 5;
@@ -12,6 +11,9 @@ var playerVerticalOffset = 60;
 var enemyMaxSpeed = 250;
 var enemyMinSpeed = 40;
 var numEnemies = 3;
+var collisionDistance = 70;
+var allEnemies;
+var player;
 
 // Enemies our player must avoid
 var Enemy = function() {
@@ -71,17 +73,24 @@ Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-Player.prototype.handleInput = function(dt) {
-
+Player.prototype.handleInput = function(key) {
+    if (key === 'up' && this.y > 0){
+        this.y -= cellHeight;
+    }
+    else if (key === 'down' && this.y < cellHeight*(numRows-2)){
+        this.y += cellHeight;
+    }
+    else if (key === 'left' && this.x > 0){
+        this.x -= cellWidth;
+    }
+    else if (key === 'right' && this.x < cellWidth*(numCols-1)){
+        this.x += cellWidth;
+    }
 };
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var player = new Player();
-var allEnemies = [];
-for (var i=0; i<numEnemies; i++){
-    allEnemies.push(new Enemy());
-}
+
 
 
 // This listens for key presses and sends the keys to your

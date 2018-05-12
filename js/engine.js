@@ -26,7 +26,7 @@ var Engine = (function(global) {
 
     canvas.width = cellWidth*numCols;
     canvas.height = cellHeight*numRows + playerVerticalOffset;
-    doc.body.appendChild(canvas);
+    doc.getElementById('game').appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -79,9 +79,18 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions();
     }
 
+    function checkCollisions(){
+      for (var i=0; i < numEnemies; i++){
+        if (allEnemies[i].y === player.y){
+          if (Math.abs(allEnemies[i].x - player.x) < collisionDistance){
+            init();
+          }
+        }
+      }
+    }
     /* This is called by the update function and loops through all of the
      * objects within your allEnemies array as defined in app.js and calls
      * their update() methods. It will then call the update function for your
@@ -160,7 +169,11 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+      player = new Player();
+      allEnemies = [];
+      for (var i=0; i<numEnemies; i++){
+          allEnemies.push(new Enemy());
+      }
     }
 
     /* Go ahead and load all of the images we know we're going to need to
