@@ -1,16 +1,51 @@
-body {
-    text-align: center;
-}
-
 html,
-body,
-#game {
+body {
   width: 95vw;
   height: 95vh;
   margin: 0;
   padding: 0;
+  text-align: center;
 }
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+h1 {
+  margin: 10 0 0;
+  padding: 0;
+}
+
 canvas {
   max-width: 100%;
-    height: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  width: 100%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: justify;
+}
+
+#buttonDiv {
+  width: 100%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+button {
+  width: 20%;
+  height: auto;
+}
+
+img {
+  width: 100%;
+  height: auto;
 }

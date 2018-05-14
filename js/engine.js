@@ -23,10 +23,11 @@ var Engine = (function(global) {
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
         lastTime;
+        counter = 0;
 
     canvas.width = cellWidth*numCols;
-    canvas.height = cellHeight*numRows + playerVerticalOffset;
-    doc.getElementById('game').appendChild(canvas);
+    canvas.height = cellHeight*numRows + canvasVerticalOffset;
+    doc.getElementById('canvas').appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -40,7 +41,7 @@ var Engine = (function(global) {
          */
         var now = Date.now(),
             dt = (now - lastTime) / 1000.0;
-
+        counter += dt;
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
@@ -69,40 +70,88 @@ var Engine = (function(global) {
     }
 
     /* This function is called by main (our game loop) and itself calls all
-     * of the functions which may need to update entity's data. Based on how
-     * you implement your collision detection (when two entities occupy the
-     * same space, for instance when your character should die), you may find
-     * the need to add an additional function call here. For now, we've left
-     * it commented out - you may or may not want to implement this
-     * functionality this way (you could just implement collision detection
-     * on the entities themselves within your app.js file).
+     * of the functions which may need to update entity's data.
      */
     function update(dt) {
         updateEntities(dt);
-        checkCollisions();
+        checkEnemyCollisions();
+        checkGemCollisions();
+        checkWaterCollisions();
     }
 
-    function checkCollisions(){
-      for (var i=0; i < numEnemies; i++){
-        if (allEnemies[i].y === player.y){
-          if (Math.abs(allEnemies[i].x - player.x) < collisionDistance){
-            init();
-          }
+    // check for enemy collisions, restart game if collision occurs
+    function checkEnemyCollisions() {
+        for (var i=0; i < numEnemies; i++){
+            if (allEnemies[i].y === player.y){
+                if (Math.abs(allEnemies[i].x - player.x) < enemyCollisionDistance){
+                    numGems = 3;
+                    gameState = 'pickPlayer';
+                    init();
+                }
+            }
         }
-      }
     }
+
+    // check for gem collisions in right order
+    function checkGemCollisions(){
+        // check all gems
+        for (var i=0; i < allGems.length; i++){
+            // collision test
+            if (Math.abs(allGems[i].y - gemVerticalOffset - player.y + playerVerticalOffset) < gemCollisionDistance
+                && Math.abs(allGems[i].x -gemHorizontalOffset - player.x) < gemCollisionDistance) {
+                // check if this is the first gem in array
+                if (i === 0) {
+                    // drop the first gem from array
+                    allGems.splice(0,1);
+                    // check to see if all gems collected
+                    if (allGems.length === 0){
+                        // if seven gems collected, game is won
+                        if (numGems === 7){
+                            endGame();
+                        }
+                        // go to next level (one more gem)
+                        else {
+                            numGems++;
+                            gameState = 'nextLevel';
+                            init();
+                        }
+                    }
+                }
+                // wrong gem so reset game
+                else {
+                    numGems = 3;
+                    gameState = 'pickPlayer';
+                    init();
+                }
+            }
+        }
+    }
+
+    // check for player in water
+    function checkWaterCollisions() {
+        if (player.y < cellHeight + playerVerticalOffset){
+            numGems = 3;
+            gameState = 'pickPlayer';
+            init();
+        }
+    }
+
+    // called when end of game is reached
+    function endGame(){
+        alert('YOU WON!!');
+        numGems = 3;
+        gameState = 'pickPlayer';
+        init();
+    }
+
     /* This is called by the update function and loops through all of the
      * objects within your allEnemies array as defined in app.js and calls
-     * their update() methods. It will then call the update function for your
-     * player object. These update methods should focus purely on updating
-     * the data/properties related to the object. Do your drawing in your
-     * render methods.
+     * their update() methods.
      */
     function updateEntities(dt) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -112,20 +161,6 @@ var Engine = (function(global) {
      * they are just drawing the entire screen over and over.
      */
     function render() {
-        /* This array holds the relative URL to the image used
-         * for that particular row of the game level.
-         */
-        var rowImages = [
-                'images/water-block.png',   // Top row is water
-                'images/stone-block.png',   // Row 1 of 3 of stone
-                'images/stone-block.png',   // Row 2 of 3 of stone
-                'images/stone-block.png',   // Row 3 of 3 of stone
-                'images/grass-block.png',   // Row 1 of 2 of grass
-                'images/grass-block.png'    // Row 2 of 2 of grass
-            ],
-
-            row, col;
-
         // Before drawing, clear existing canvas
         ctx.clearRect(0,0,canvas.width,canvas.height)
 
@@ -133,8 +168,8 @@ var Engine = (function(global) {
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
          */
-        for (row = 0; row < numRows; row++) {
-            for (col = 0; col < numCols; col++) {
+        for (var row = 0; row < numRows; row++) {
+            for (var col = 0; col < numCols; col++) {
                 /* The drawImage function of the canvas' context element
                  * requires 3 parameters: the image to draw, the x coordinate
                  * to start drawing and the y coordinate to start drawing.
@@ -161,19 +196,78 @@ var Engine = (function(global) {
             enemy.render();
         });
 
+        allGems.forEach(function(gem) {
+            gem.render();
+        });
+
         player.render();
     }
 
-    /* This function does nothing but it could have been a good place to
-     * handle game reset states - maybe a new game menu or a game over screen
-     * those sorts of things. It's only called once by the init() method.
+    /* Called by init()--if this is the start, or restart, then construct a new
+     * player and enemies, and hide the remaining gems. Show the player
+     * instructions and icons. Wait for the player to pick an icon, then place
+     * the gems. If this is a level up, then reposition the player icon on the grass,
+     * construct new enemies, and place the gems.
      */
     function reset() {
-      player = new Player();
-      allEnemies = [];
-      for (var i=0; i<numEnemies; i++){
-          allEnemies.push(new Enemy());
-      }
+        if (gameState === 'pickPlayer') {
+            player = new Player();
+            placeEnemies();
+            allGems.forEach(function(gem) {
+                gem.show = false;
+            });
+
+            // make and place instructions
+            var instructionPar = doc.createElement('p');
+            instructionPar.id = 'instructionPar';
+            instructionPar.innerHTML =
+                "Click on a player icon below to start. " +
+                "Use the arrow keys to move player left, right, up, or down. " +
+                "Pick up the gems in the order presented. " +
+                "Game is over when player hits a bug, goes in the water, or picks the wrong gem. " +
+                "To win the game, complete the seven gem challenge (there may be " +
+                "unsolvable positions. Just run into any gem or bug and start over.)";
+            // control width
+            instructionPar.style.maxWidth = (cellWidth*numCols).toString()+'px';
+            doc.getElementById('game').appendChild(instructionPar);
+
+            // make and place the player icon choices
+            var buttonDiv = doc.createElement('div');
+            buttonDiv.id = 'buttonDiv';
+            playerImages.forEach(function(image) {
+                var button = doc.createElement('button');
+                var img = doc.createElement('img');
+                img.src = image;
+                button.appendChild(img);
+                buttonDiv.appendChild(button);
+                button.onclick = function(e) {
+                    player.sprite = image;
+                    gameState = 'placeGems';
+                    // when an icon is selected, remove instructions and icons
+                    instructionPar.remove();
+                    buttonDiv.remove();
+                    placeGems();
+                };
+            });
+            // control width
+            buttonDiv.style.maxWidth = (cellWidth*numCols).toString()+'px';
+            doc.getElementById('game').appendChild(buttonDiv);
+
+            // check for button click every 100 milliseconds
+            function wait() {
+                if (gameState === 'pickPlayer') {
+                    setTimeout(wait,100);
+                }
+            }
+            wait();
+        }
+
+        if (gameState === 'nextLevel'){
+            // reposition player on grass
+            player.initialize();
+            placeEnemies();
+            placeGems();
+        }
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -185,7 +279,18 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+        'images/char-pink-girl.png',
+        'images/char-princess-girl.png',
+        'images/char-cat-girl.png',
+        'images/char-horn-girl.png',
+        'images/gem-blue.png',
+        'images/gem-orange.png',
+        'images/gem-green.png',
+        'images/gem-red.png',
+        'images/gem-yellow.png',
+        'images/gem-gray.png',
+        'images/gem-pink.png',
     ]);
     Resources.onReady(init);
 
