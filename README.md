@@ -1,6 +1,19 @@
-frontend-nanodegree-arcade-game
-===============================
+# Arcade Game Project
 
-Students should use this [rubric](https://review.udacity.com/#!/projects/2696458597/rubric) for self-checking their submission. Make sure the functions you write are **object-oriented** - either class functions (like Player and Enemy) or class prototype functions such as Enemy.prototype.checkCollisions, and that the keyword 'this' is used appropriately within your class and class prototype functions to refer to the object the function is called upon. Also be sure that the **readme.md** file is updated with your instructions on both how to 1. Run and 2. Play your arcade game.
+## Table of Contents
 
-For detailed instructions on how to get started, check out this [guide](https://docs.google.com/document/d/1v01aScPjSWCCWQLIpFqvg3-vXLH2e8_SZQKC8jNO0Dc/pub?embedded=true).
+* [About](#about)
+* [Instructions](#instructions)
+
+## About
+
+This project is required for completion of the Front End Nanodegree Developer program
+at [Udacity](udacity.com). The starting code was cloned from [GitHub](https://github.com/udacity/frontend-nanodegree-arcade-game.git)
+
+## Instructions
+
+To play, click on a player icon at the bottom of the screen. This will trigger the
+placement of three gems. The gems must be collected in the order of their
+appearance. Touching a bug, the water at the top, or the wrong gem will restart
+the game. If all gems are collected successfully, a new level with one more gem will
+start. Winning the game requires collecting seven gems.
