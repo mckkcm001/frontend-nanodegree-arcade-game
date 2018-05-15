@@ -3,7 +3,7 @@
 ## Table of Contents
 
 * [About](#about)
-* [Try It!!](#tryit)
+* [Try It!!](https://mckkcm001.github.io/frontend-nanodegree-arcade-game/)
 * [Instructions](#instructions)
 
 ## About
