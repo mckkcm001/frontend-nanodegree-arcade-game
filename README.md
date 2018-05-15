@@ -12,6 +12,8 @@ at [Udacity](udacity.com). The starting code was cloned from [GitHub](https://gi
 
 ## Instructions
 
+Download or clone the project. Open the index.html file in your favorite browser.
+
 To play, click on a player icon at the bottom of the screen. This will trigger the
 placement of three gems. The gems must be collected in the order of their
 appearance. Touching a bug, the water at the top, or the wrong gem will restart
