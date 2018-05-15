@@ -3,12 +3,17 @@
 ## Table of Contents
 
 * [About](#about)
+* [Try It!!](#tryit)
 * [Instructions](#instructions)
 
 ## About
 
 This project is required for completion of the Front End Nanodegree Developer program
 at [Udacity](udacity.com). The starting code was cloned from [GitHub](https://github.com/udacity/frontend-nanodegree-arcade-game.git)
+
+## Try it!!
+
+[Link to game](https://mckkcm001.github.io/frontend-nanodegree-arcade-game/)
 
 ## Instructions
 
